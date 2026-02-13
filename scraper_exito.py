@@ -155,7 +155,25 @@ class ExitoScraper:
     
     def generar_html_email(self, cambios):
         """Genera HTML profesional y minimalista para el email"""
-        fecha_actual = datetime.now().strftime("%d/%m/%Y %H:%M")
+        
+        # Generar filas de productos (2 por fila)
+        filas_html = ""
+        for i in range(0, len(cambios), 2):
+            cambio1 = cambios[i]
+            cambio2 = cambios[i + 1] if i + 1 < len(cambios) else None
+            
+            filas_html += '<tr>'
+            
+            # Primera columna
+            filas_html += self._generar_celda_producto(cambio1)
+            
+            # Segunda columna (o vacía si es impar)
+            if cambio2:
+                filas_html += self._generar_celda_producto(cambio2)
+            else:
+                filas_html += '<td style="width: 48%; padding: 8px;"></td>'
+            
+            filas_html += '</tr>'
         
         html = f"""
 <!DOCTYPE html>
@@ -163,219 +181,25 @@ class ExitoScraper:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {{
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-            line-height: 1.6;
-            color: #2c3e50;
-            margin: 0;
-            padding: 20px;
-            background-color: #f8f9fa;
-        }}
-        .container {{
-            max-width: 1000px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }}
-        .header {{
-            background-color: #4a5568;
-            color: #ffffff;
-            padding: 25px 20px;
-            text-align: center;
-        }}
-        .header h1 {{
-            margin: 0;
-            font-size: 20px;
-            font-weight: 600;
-        }}
-        .content {{
-            padding: 20px;
-        }}
-        .productos-grid {{
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin-bottom: 16px;
-        }}
-        .cambio {{
-            background-color: #faf8f5;
-            border-radius: 8px;
-            padding: 16px;
-            border-left: 4px solid #4a5568;
-        }}
-        .cambio.empeoro {{
-            border-left-color: #dc3545;
-            background-color: #faf8f5;
-        }}
-        .cambio.mejoro {{
-            border-left-color: #28a745;
-            background-color: #faf8f5;
-        }}
-        .producto-nombre {{
-            font-size: 15px;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 10px;
-            line-height: 1.3;
-            min-height: 40px;
-        }}
-        .posicion-badge {{
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }}
-        .posicion-badge.empeoro {{
-            background-color: #dc3545;
-            color: #ffffff;
-        }}
-        .posicion-badge.mejoro {{
-            background-color: #28a745;
-            color: #ffffff;
-        }}
-        .posicion-badge.nuevo {{
-            background-color: #4a5568;
-            color: #ffffff;
-        }}
-        .info-grid {{
-            display: table;
-            width: 100%;
-            margin: 10px 0;
-        }}
-        .info-row {{
-            display: table-row;
-        }}
-        .info-label {{
-            display: table-cell;
-            padding: 6px 10px 6px 0;
-            color: #7f8c8d;
-            font-size: 12px;
-            font-weight: 500;
-            width: 45%;
-        }}
-        .info-valor {{
-            display: table-cell;
-            padding: 6px 0;
-            color: #2c3e50;
-            font-size: 13px;
-            font-weight: 600;
-        }}
-        .btn-producto {{
-            display: inline-block;
-            margin-top: 10px;
-            padding: 8px 16px;
-            background-color: #4a5568;
-            color: #ffffff !important;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 500;
-        }}
-        .footer {{
-            background-color: #f8f9fa;
-            padding: 20px;
-            text-align: center;
-            font-size: 12px;
-            color: #95a5a6;
-            border-top: 1px solid #ecf0f1;
-        }}
-        @media only screen and (max-width: 700px) {{
-            body {{
-                padding: 10px;
-            }}
-            .container {{
-                max-width: 100%;
-            }}
-            .productos-grid {{
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }}
-            .header {{
-                padding: 20px 15px;
-            }}
-            .header h1 {{
-                font-size: 18px;
-            }}
-            .content {{
-                padding: 15px;
-            }}
-            .cambio {{
-                padding: 15px;
-            }}
-            .producto-nombre {{
-                font-size: 14px;
-                min-height: auto;
-            }}
-            .info-label {{
-                font-size: 11px;
-            }}
-            .info-valor {{
-                font-size: 12px;
-            }}
-        }}
-    </style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Cambios de Posición - Éxito Marketplace</h1>
-        </div>
-        <div class="content">
-            <div class="productos-grid">
-"""
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #2c3e50; margin: 0; padding: 20px; background-color: #f8f9fa;">
+    <div style="max-width: 1000px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
         
-        for cambio in cambios:
-            pos_anterior = cambio.get('micelu_posicion_anterior')
-            pos_nueva = cambio.get('micelu_posicion_nuevo')
-            
-            # Determinar clase y texto
-            if pos_anterior is None:
-                clase_cambio = "nuevo"
-                texto_cambio = f"Posición: #{pos_nueva}"
-                clase_badge = "nuevo"
-            elif pos_nueva is None:
-                clase_cambio = "empeoro"
-                texto_cambio = "Sin posición"
-                clase_badge = "empeoro"
-            elif pos_nueva < pos_anterior:
-                clase_cambio = "mejoro"
-                texto_cambio = f"Top #{pos_anterior} → Top #{pos_nueva}"
-                clase_badge = "mejoro"
-            else:
-                clase_cambio = "empeoro"
-                texto_cambio = f"Top #{pos_anterior} → Top #{pos_nueva}"
-                clase_badge = "empeoro"
-            
-            html += f"""
-                <div class="cambio {clase_cambio}">
-                    <div class="producto-nombre">{cambio.get('producto')}</div>
-                    <span class="posicion-badge {clase_badge}">{texto_cambio}</span>
-                    
-                    <div class="info-grid">
-                        <div class="info-row">
-                            <div class="info-label">Precio Micelu:</div>
-                            <div class="info-valor">{cambio.get('micelu_precio_nuevo') or 'N/A'}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Precio Top #1:</div>
-                            <div class="info-valor">{cambio.get('posicion_1_nuevo')}</div>
-                        </div>
-                    </div>
-                    
-                    <a href="{cambio.get('url')}" class="btn-producto">Ver en Éxito</a>
-                </div>
-"""
-        
-        html += """
-            </div>
+        <!-- Header -->
+        <div style="background-color: #4a5568; color: #ffffff; padding: 25px 20px; text-align: center;">
+            <h1 style="margin: 0; font-size: 20px; font-weight: 600;">Cambios de Posición - Éxito Marketplace</h1>
         </div>
-        <div class="footer">
-            <p>Sistema de Monitoreo Automático · Micelu</p>
+        
+        <!-- Content -->
+        <div style="padding: 12px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                {filas_html}
+            </table>
+        </div>
+        
+        <!-- Footer -->
+        <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #95a5a6; border-top: 1px solid #ecf0f1;">
+            <p style="margin: 0;">Sistema de Monitoreo Automático · Micelu</p>
         </div>
     </div>
 </body>
@@ -383,6 +207,53 @@ class ExitoScraper:
 """
         
         return html
+    
+    def _generar_celda_producto(self, cambio):
+        """Genera HTML de una celda de producto"""
+        pos_anterior = cambio.get('micelu_posicion_anterior')
+        pos_nueva = cambio.get('micelu_posicion_nuevo')
+        
+        # Determinar clase y texto
+        if pos_anterior is None:
+            color_borde = "#4a5568"
+            color_badge = "#4a5568"
+            texto_cambio = f"Posición: #{pos_nueva}"
+        elif pos_nueva is None:
+            color_borde = "#dc3545"
+            color_badge = "#dc3545"
+            texto_cambio = "Sin posición"
+        elif pos_nueva < pos_anterior:
+            color_borde = "#28a745"
+            color_badge = "#28a745"
+            texto_cambio = f"Top #{pos_anterior} → Top #{pos_nueva}"
+        else:
+            color_borde = "#dc3545"
+            color_badge = "#dc3545"
+            texto_cambio = f"Top #{pos_anterior} → Top #{pos_nueva}"
+        
+        return f"""
+            <td style="width: 48%; padding: 8px; vertical-align: top;">
+                <div style="background-color: #faf8f5; border-radius: 8px; padding: 14px; border-left: 4px solid {color_borde};">
+                    <div style="font-size: 14px; font-weight: 600; color: #2c3e50; margin-bottom: 10px; line-height: 1.3; min-height: 38px;">
+                        {cambio.get('producto')}
+                    </div>
+                    <span style="display: inline-block; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; margin-bottom: 10px; background-color: {color_badge}; color: #ffffff;">
+                        {texto_cambio}
+                    </span>
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 10px 0;">
+                        <tr>
+                            <td style="padding: 5px 8px 5px 0; color: #7f8c8d; font-size: 11px; font-weight: 500; width: 45%;">Precio Micelu:</td>
+                            <td style="padding: 5px 0; color: #2c3e50; font-size: 12px; font-weight: 600;">{cambio.get('micelu_precio_nuevo') or 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 5px 8px 5px 0; color: #7f8c8d; font-size: 11px; font-weight: 500;">Precio Top #1:</td>
+                            <td style="padding: 5px 0; color: #2c3e50; font-size: 12px; font-weight: 600;">{cambio.get('posicion_1_nuevo')}</td>
+                        </tr>
+                    </table>
+                    <a href="{cambio.get('url')}" style="display: inline-block; margin-top: 8px; padding: 7px 14px; background-color: #4a5568; color: #ffffff; text-decoration: none; border-radius: 6px; font-size: 11px; font-weight: 500;">Ver en Éxito</a>
+                </div>
+            </td>
+        """
     
     def clasificar_producto(self, producto):
         """Clasifica producto según prioridad basado en posición de Micelu"""
