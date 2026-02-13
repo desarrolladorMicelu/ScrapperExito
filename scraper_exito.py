@@ -173,7 +173,7 @@ class ExitoScraper:
             background-color: #f8f9fa;
         }}
         .container {{
-            max-width: 600px;
+            max-width: 1000px;
             margin: 0 auto;
             background-color: #ffffff;
             border-radius: 8px;
@@ -187,23 +187,23 @@ class ExitoScraper:
             text-align: center;
         }}
         .header h1 {{
-            margin: 0 0 8px 0;
+            margin: 0;
             font-size: 20px;
             font-weight: 600;
-        }}
-        .header p {{
-            margin: 0;
-            font-size: 13px;
-            opacity: 0.9;
         }}
         .content {{
             padding: 20px;
         }}
+        .productos-grid {{
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 16px;
+        }}
         .cambio {{
             background-color: #faf8f5;
             border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 16px;
+            padding: 16px;
             border-left: 4px solid #4a5568;
         }}
         .cambio.empeoro {{
@@ -215,19 +215,20 @@ class ExitoScraper:
             background-color: #faf8f5;
         }}
         .producto-nombre {{
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             color: #2c3e50;
-            margin-bottom: 12px;
-            line-height: 1.4;
+            margin-bottom: 10px;
+            line-height: 1.3;
+            min-height: 40px;
         }}
         .posicion-badge {{
             display: inline-block;
-            padding: 6px 12px;
+            padding: 5px 10px;
             border-radius: 6px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }}
         .posicion-badge.empeoro {{
             background-color: #dc3545;
@@ -244,35 +245,35 @@ class ExitoScraper:
         .info-grid {{
             display: table;
             width: 100%;
-            margin: 12px 0;
+            margin: 10px 0;
         }}
         .info-row {{
             display: table-row;
         }}
         .info-label {{
             display: table-cell;
-            padding: 8px 12px 8px 0;
+            padding: 6px 10px 6px 0;
             color: #7f8c8d;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 500;
-            width: 40%;
+            width: 45%;
         }}
         .info-valor {{
             display: table-cell;
-            padding: 8px 0;
+            padding: 6px 0;
             color: #2c3e50;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
         }}
         .btn-producto {{
             display: inline-block;
-            margin-top: 12px;
-            padding: 10px 20px;
+            margin-top: 10px;
+            padding: 8px 16px;
             background-color: #4a5568;
             color: #ffffff !important;
             text-decoration: none;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 500;
         }}
         .footer {{
@@ -283,9 +284,16 @@ class ExitoScraper:
             color: #95a5a6;
             border-top: 1px solid #ecf0f1;
         }}
-        @media only screen and (max-width: 600px) {{
+        @media only screen and (max-width: 700px) {{
             body {{
                 padding: 10px;
+            }}
+            .container {{
+                max-width: 100%;
+            }}
+            .productos-grid {{
+                grid-template-columns: 1fr;
+                gap: 12px;
             }}
             .header {{
                 padding: 20px 15px;
@@ -300,14 +308,14 @@ class ExitoScraper:
                 padding: 15px;
             }}
             .producto-nombre {{
-                font-size: 15px;
+                font-size: 14px;
+                min-height: auto;
             }}
             .info-label {{
-                font-size: 12px;
-                width: 45%;
+                font-size: 11px;
             }}
             .info-valor {{
-                font-size: 13px;
+                font-size: 12px;
             }}
         }}
     </style>
@@ -316,9 +324,9 @@ class ExitoScraper:
     <div class="container">
         <div class="header">
             <h1>Cambios de Posición - Éxito Marketplace</h1>
-            <p>Micelu · {fecha_actual}</p>
         </div>
         <div class="content">
+            <div class="productos-grid">
 """
         
         for cambio in cambios:
@@ -344,26 +352,27 @@ class ExitoScraper:
                 clase_badge = "empeoro"
             
             html += f"""
-            <div class="cambio {clase_cambio}">
-                <div class="producto-nombre">{cambio.get('producto')}</div>
-                <span class="posicion-badge {clase_badge}">{texto_cambio}</span>
-                
-                <div class="info-grid">
-                    <div class="info-row">
-                        <div class="info-label">Precio Micelu:</div>
-                        <div class="info-valor">{cambio.get('micelu_precio_nuevo') or 'N/A'}</div>
+                <div class="cambio {clase_cambio}">
+                    <div class="producto-nombre">{cambio.get('producto')}</div>
+                    <span class="posicion-badge {clase_badge}">{texto_cambio}</span>
+                    
+                    <div class="info-grid">
+                        <div class="info-row">
+                            <div class="info-label">Precio Micelu:</div>
+                            <div class="info-valor">{cambio.get('micelu_precio_nuevo') or 'N/A'}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Precio Top #1:</div>
+                            <div class="info-valor">{cambio.get('posicion_1_nuevo')}</div>
+                        </div>
                     </div>
-                    <div class="info-row">
-                        <div class="info-label">Precio Top #1:</div>
-                        <div class="info-valor">{cambio.get('posicion_1_nuevo')}</div>
-                    </div>
+                    
+                    <a href="{cambio.get('url')}" class="btn-producto">Ver en Éxito</a>
                 </div>
-                
-                <a href="{cambio.get('url')}" class="btn-producto">Ver en Éxito</a>
-            </div>
 """
         
         html += """
+            </div>
         </div>
         <div class="footer">
             <p>Sistema de Monitoreo Automático · Micelu</p>
