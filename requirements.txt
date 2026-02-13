@@ -1,0 +1,9 @@
+requests
+beautifulsoup4
+pandas
+openpyxl
+azure-communication-email
+boto3
+flask
+flask-cors
+python-dotenv

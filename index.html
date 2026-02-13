@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de Precios - Micelu | Éxito Marketplace</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #f8f9fa;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .header {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 0.25rem;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        .update-info {
+            background-color: #f3f4f6;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #374151;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: #ffffff;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #6b7280;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .content-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .tabs {
+            display: flex;
+            background-color: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            background: transparent;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn:hover {
+            color: #1a1a1a;
+            background-color: #f3f4f6;
+        }
+
+        .tab-btn.active {
+            color: #1a1a1a;
+            background-color: #ffffff;
+            border-bottom-color: #1a1a1a;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 1.5rem;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .search-container {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #1a1a1a;
+            box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.05);
+        }
+
+        .btn {
+            padding: 0.875rem 1.75rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background-color: #000000;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        th {
+            padding: 0.875rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 0.875rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.375rem 0.875rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-top1 {
+            background-color: #dc2626;
+            color: #ffffff;
+        }
+
+        .badge-top3 {
+            background-color: #059669;
+            color: #ffffff;
+        }
+
+        .badge-top10 {
+            background-color: #2563eb;
+            color: #ffffff;
+        }
+
+        .badge-none {
+            background-color: #e5e7eb;
+            color: #6b7280;
+        }
+
+        .price {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #1a1a1a;
+        }
+
+        .link-btn {
+            color: #1a1a1a;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+
+        .link-btn:hover {
+            background-color: #f3f4f6;
+            border-color: #1a1a1a;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: #6b7280;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #1a1a1a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #6b7280;
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+            color: #1a1a1a;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .search-container {
+                min-width: 100%;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div>
+                    <h1>Monitor de Precios</h1>
+                    <p class="subtitle">Éxito Marketplace · Micelu</p>
+                </div>
+                <div class="update-info" id="lastUpdate">
+                    Cargando datos...
+                </div>
+            </div>
+        </div>
+
+        <div class="content-card" style="margin-bottom: 2rem;">
+            <div style="padding: 1.5rem;">
+                <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">Configurar Productos a Monitorear</h3>
+                <p style="color: #6b7280; margin-bottom: 1rem; font-size: 0.9rem;">
+                    Sube un archivo Excel con las columnas: EAN, Nombre del Producto, Codigo OFIM, Color OFIM
+                </p>
+                <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                    <input type="file" id="excelFile" accept=".xlsx,.xls" style="flex: 1; min-width: 250px;">
+                    <button class="btn btn-primary" onclick="subirExcel()">Subir Excel</button>
+                    <span id="uploadStatus" style="color: #6b7280; font-size: 0.9rem;"></span>
+                </div>
+                <div id="productosConfigurados" style="margin-top: 1rem; font-size: 0.9rem; color: #6b7280;"></div>
+            </div>
+        </div>
+
+        <div class="stats-grid" id="stats">
+            <div class="stat-card">
+                <div class="stat-label">Cargando...</div>
+                <div class="stat-value">-</div>
+            </div>
+        </div>
+
+        <div class="content-card">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('productos')">
+                    Productos Activos
+                </button>
+                <button class="tab-btn" onclick="switchTab('historial')">
+                    Historial de Cambios
+                </button>
+            </div>
+
+            <div id="productos" class="tab-content active">
+                <div class="controls">
+                    <div class="search-container">
+                        <input type="text" class="search-input" id="searchBox" placeholder="Buscar producto...">
+                    </div>
+                    <button class="btn btn-primary" onclick="exportarExcel('productos')">
+                        Descargar Excel
+                    </button>
+                </div>
+                <div class="table-container" id="productosTable">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Cargando productos...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="historial" class="tab-content">
+                <div class="controls">
+                    <div class="search-container">
+                        <input type="text" class="search-input" id="searchHistorial" placeholder="Buscar en historial...">
+                    </div>
+                    <button class="btn btn-primary" onclick="exportarExcel('historial')">
+                        Descargar Excel
+                    </button>
+                </div>
+                <div class="table-container" id="historialTable">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Cargando historial...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        const R2_PUBLIC_URL = 'https://pub-2ba22ab94c804c19ab1454420b01a6b8.r2.dev';
+        const API_URL = 'http://localhost:5000';  // Cambiar a URL de Railway cuando despliegues
+        let productosData = [];
+        let historialData = [];
+
+        window.onload = () => {
+            cargarDatos();
+            cargarProductosConfigurados();
+            setInterval(cargarDatos, 60000);
+        };
+
+        async function subirExcel() {
+            const fileInput = document.getElementById('excelFile');
+            const statusEl = document.getElementById('uploadStatus');
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                statusEl.textContent = 'Selecciona un archivo';
+                statusEl.style.color = '#dc2626';
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            statusEl.textContent = 'Subiendo...';
+            statusEl.style.color = '#6b7280';
+            
+            try {
+                const response = await fetch(`${API_URL}/upload-excel`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    statusEl.textContent = `✓ ${result.message}`;
+                    statusEl.style.color = '#059669';
+                    fileInput.value = '';
+                    cargarProductosConfigurados();
+                } else {
+                    statusEl.textContent = `✗ ${result.error}`;
+                    statusEl.style.color = '#dc2626';
+                }
+            } catch (error) {
+                statusEl.textContent = `✗ Error: ${error.message}`;
+                statusEl.style.color = '#dc2626';
+            }
+        }
+
+        async function cargarProductosConfigurados() {
+            try {
+                const response = await fetch(`${API_URL}/productos-actuales`);
+                const data = await response.json();
+                
+                if (data.productos && data.productos.length > 0) {
+                    document.getElementById('productosConfigurados').innerHTML = 
+                        `Productos configurados: ${data.productos.length} | Última actualización: ${new Date(data.fecha_actualizacion).toLocaleString('es-CO')}`;
+                }
+            } catch (error) {
+                console.log('No hay productos configurados aún');
+            }
+        }
+
+        async function cargarDatos() {
+            try {
+                const respProductos = await fetch(`${R2_PUBLIC_URL}/iphones_exito.json?t=${Date.now()}`);
+                productosData = await respProductos.json();
+                
+                const respHistorial = await fetch(`${R2_PUBLIC_URL}/historial_cambios.json?t=${Date.now()}`);
+                historialData = await respHistorial.json();
+                
+                renderProductos();
+                renderHistorial();
+                actualizarStats();
+                actualizarFecha();
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarError();
+            }
+        }
+
+        function renderProductos() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            const filtered = productosData.filter(p => 
+                p.nombre.toLowerCase().includes(searchTerm)
+            );
+
+            if (filtered.length === 0) {
+                document.getElementById('productosTable').innerHTML = `
+                    <div class="empty-state">
+                        <h3>No se encontraron productos</h3>
+                        <p>Intenta con otro término de búsqueda</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Código OFIM</th>
+                            <th>Color OFIM</th>
+                            <th>Posición Micelu</th>
+                            <th>Precio Micelu</th>
+                            <th>Precio Top 1</th>
+                            <th>Diferencia</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filtered.map(p => `
+                            <tr>
+                                <td><strong>${p.nombre}</strong></td>
+                                <td>${p.codigo_ofim || '-'}</td>
+                                <td>${p.color_ofim || '-'}</td>
+                                <td>${getBadge(p.micelu)}</td>
+                                <td class="price">${p.micelu.precio || 'N/A'}</td>
+                                <td class="price">${p.posicion_1.precio}</td>
+                                <td>${p.micelu.diferencia_vs_posicion1 || '-'}</td>
+                                <td><a href="${p.url}" target="_blank" class="link-btn">Ver</a></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('productosTable').innerHTML = html;
+        }
+
+        function renderHistorial() {
+            const searchTerm = document.getElementById('searchHistorial').value.toLowerCase();
+            const filtered = historialData.filter(h => 
+                h.producto.toLowerCase().includes(searchTerm)
+            );
+
+            if (filtered.length === 0) {
+                document.getElementById('historialTable').innerHTML = `
+                    <div class="empty-state">
+                        <h3>No hay cambios registrados</h3>
+                        <p>Los cambios de posición aparecerán aquí</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Fecha</th>
+                            <th>Cambio</th>
+                            <th>Precio Micelu</th>
+                            <th>Precio Top 1</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filtered.map(h => `
+                            <tr>
+                                <td><strong>${h.producto}</strong></td>
+                                <td>${formatFecha(h.fecha)}</td>
+                                <td>${formatCambio(h)}</td>
+                                <td class="price">${h.micelu_precio_nuevo || 'N/A'}</td>
+                                <td class="price">${h.posicion_1_nuevo}</td>
+                                <td><a href="${h.url}" target="_blank" class="link-btn">Ver</a></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('historialTable').innerHTML = html;
+        }
+
+        function getBadge(micelu) {
+            if (!micelu.existe) return '<span class="badge badge-none">Sin posición</span>';
+            const pos = micelu.posicion;
+            if (pos === 1) return '<span class="badge badge-top1">Top 1</span>';
+            if (pos <= 3) return '<span class="badge badge-top3">Top ' + pos + '</span>';
+            if (pos <= 10) return '<span class="badge badge-top10">Top ' + pos + '</span>';
+            return '<span class="badge badge-none">Top ' + pos + '</span>';
+        }
+
+        function formatCambio(h) {
+            const ant = h.micelu_posicion_anterior;
+            const nuevo = h.micelu_posicion_nuevo;
+            if (ant === null) return `Nuevo: Top ${nuevo}`;
+            if (nuevo === null) return 'Sin posición';
+            return `Top ${ant} → Top ${nuevo}`;
+        }
+
+        function formatFecha(fecha) {
+            return new Date(fecha).toLocaleString('es-CO', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function actualizarStats() {
+            const criticos = productosData.filter(p => p.micelu.existe && p.micelu.posicion <= 3).length;
+            const medios = productosData.filter(p => p.micelu.existe && p.micelu.posicion > 3 && p.micelu.posicion <= 10).length;
+            const total = productosData.length;
+
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-label">Total Productos</div>
+                    <div class="stat-value">${total}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Top 1-3</div>
+                    <div class="stat-value">${criticos}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Top 4-10</div>
+                    <div class="stat-value">${medios}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Cambios Totales</div>
+                    <div class="stat-value">${historialData.length}</div>
+                </div>
+            `;
+        }
+
+        function actualizarFecha() {
+            if (productosData.length > 0) {
+                const fecha = new Date(productosData[0].fecha_consulta);
+                document.getElementById('lastUpdate').textContent = 
+                    `Actualizado: ${fecha.toLocaleString('es-CO', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`;
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tab).classList.add('active');
+        }
+
+        function exportarExcel(tipo) {
+            const data = tipo === 'productos' ? productosData : historialData;
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, tipo);
+            const filename = `${tipo}_micelu_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(wb, filename);
+        }
+
+        function mostrarError() {
+            document.getElementById('productosTable').innerHTML = `
+                <div class="empty-state">
+                    <h3>Error al cargar datos</h3>
+                    <p>Verifica que el scraper haya subido los archivos a R2</p>
+                </div>
+            `;
+        }
+
+        document.getElementById('searchBox').addEventListener('input', renderProductos);
+        document.getElementById('searchHistorial').addEventListener('input', renderHistorial);
+    </script>
+</body>
+</html>
