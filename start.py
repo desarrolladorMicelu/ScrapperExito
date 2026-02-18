@@ -10,7 +10,10 @@ load_dotenv()
 
 # Configuración
 API_KEY = os.getenv('SCRAPER_API_KEY')
-EMAILS_ADMIN = [os.getenv('EMAIL_ADMIN_1'), os.getenv('EMAIL_ADMIN_2')]
+
+# Leer emails destinatarios (separados por comas)
+emails_str = os.getenv('EMAILS_DESTINATARIOS', '')
+EMAILS_ADMIN = [email.strip() for email in emails_str.split(',') if email.strip()]
 
 def run_flask():
     """Corre el servidor Flask"""

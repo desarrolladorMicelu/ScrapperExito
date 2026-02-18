@@ -11,6 +11,7 @@ from botocore.client import Config
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
 from dotenv import load_dotenv
+import pytz
 
 # Cargar variables de entorno
 load_dotenv()
@@ -254,6 +255,93 @@ class ExitoScraper:
                 </div>
             </td>
         """
+    
+    def calcular_proxima_ejecucion(self):
+        """Calcula cuántos segundos faltan para la próxima ejecución permitida"""
+        from datetime import timedelta
+        
+        tz_colombia = pytz.timezone('America/Bogota')
+        ahora = datetime.now(tz_colombia)
+        
+        # Leer configuración
+        horario_inicio = os.getenv('HORARIO_INICIO', '08:30')
+        horario_fin = os.getenv('HORARIO_FIN', '18:30')
+        dias_laborales_str = os.getenv('DIAS_LABORALES', '1,2,3,4,5,6')
+        dias_laborales = [int(d.strip()) for d in dias_laborales_str.split(',')]
+        
+        # Parsear horarios
+        hora_inicio_parts = horario_inicio.split(':')
+        hora_inicio_h = int(hora_inicio_parts[0])
+        hora_inicio_m = int(hora_inicio_parts[1])
+        
+        hora_fin_parts = horario_fin.split(':')
+        hora_fin_h = int(hora_fin_parts[0])
+        hora_fin_m = int(hora_fin_parts[1])
+        
+        dia_actual = ahora.weekday() + 1  # 1=Lunes, 7=Domingo
+        
+        # Si estamos en horario laboral, retornar 0 (ejecutar ahora)
+        if self.esta_en_horario_laboral():
+            return 0
+        
+        # Caso 1: Mismo día, antes del horario de inicio
+        if dia_actual in dias_laborales:
+            hora_actual_decimal = ahora.hour + ahora.minute / 60.0
+            hora_inicio_decimal = hora_inicio_h + hora_inicio_m / 60.0
+            
+            if hora_actual_decimal < hora_inicio_decimal:
+                # Falta para que inicie hoy
+                proximo_inicio = ahora.replace(hour=hora_inicio_h, minute=hora_inicio_m, second=0, microsecond=0)
+                segundos = (proximo_inicio - ahora).total_seconds()
+                return max(segundos, 60)  # Mínimo 1 minuto
+        
+        # Caso 2: Buscar el próximo día laboral
+        for dias_adelante in range(1, 8):
+            fecha_futura = ahora + timedelta(days=dias_adelante)
+            dia_futuro = fecha_futura.weekday() + 1
+            
+            if dia_futuro in dias_laborales:
+                # Encontramos el próximo día laboral
+                proximo_inicio = fecha_futura.replace(hour=hora_inicio_h, minute=hora_inicio_m, second=0, microsecond=0)
+                segundos = (proximo_inicio - ahora).total_seconds()
+                return max(segundos, 60)  # Mínimo 1 minuto
+        
+        # Fallback: 30 minutos
+        return 30 * 60
+    
+    def esta_en_horario_laboral(self):
+        """Verifica si está en horario laboral según configuración en .env"""
+        # Zona horaria de Colombia
+        tz_colombia = pytz.timezone('America/Bogota')
+        ahora = datetime.now(tz_colombia)
+        
+        # Leer configuración desde .env
+        horario_inicio = os.getenv('HORARIO_INICIO', '08:30')
+        horario_fin = os.getenv('HORARIO_FIN', '18:30')
+        dias_laborales_str = os.getenv('DIAS_LABORALES', '1,2,3,4,5,6')
+        
+        # Convertir días laborales a lista de enteros
+        dias_laborales = [int(d.strip()) for d in dias_laborales_str.split(',')]
+        
+        # Verificar día de la semana (1=Lunes, 7=Domingo)
+        dia_semana = ahora.weekday() + 1  # weekday() retorna 0-6, necesitamos 1-7
+        if dia_semana not in dias_laborales:
+            return False
+        
+        # Convertir horarios a horas decimales
+        hora_inicio_parts = horario_inicio.split(':')
+        hora_inicio_decimal = int(hora_inicio_parts[0]) + int(hora_inicio_parts[1]) / 60.0
+        
+        hora_fin_parts = horario_fin.split(':')
+        hora_fin_decimal = int(hora_fin_parts[0]) + int(hora_fin_parts[1]) / 60.0
+        
+        # Verificar hora actual
+        hora_actual = ahora.hour + ahora.minute / 60.0
+        
+        if hora_actual < hora_inicio_decimal or hora_actual >= hora_fin_decimal:
+            return False
+        
+        return True
     
     def clasificar_producto(self, producto):
         """Clasifica producto según prioridad basado en posición de Micelu"""
@@ -829,6 +917,13 @@ class ExitoScraper:
     
     def monitorear_inteligente(self):
         """Monitoreo inteligente con intervalos adaptativos"""
+        # Leer configuración de horario
+        horario_inicio = os.getenv('HORARIO_INICIO', '08:30')
+        horario_fin = os.getenv('HORARIO_FIN', '18:30')
+        dias_laborales_str = os.getenv('DIAS_LABORALES', '1,2,3,4,5,6')
+        dias_nombres = {1: 'Lun', 2: 'Mar', 3: 'Mié', 4: 'Jue', 5: 'Vie', 6: 'Sáb', 7: 'Dom'}
+        dias_config = [dias_nombres[int(d.strip())] for d in dias_laborales_str.split(',')]
+        
         print(f"\n{'='*60}")
         print(f"MONITOREO INTELIGENTE INICIADO")
         print(f"{'='*60}")
@@ -836,6 +931,7 @@ class ExitoScraper:
         print(f"  🔴 Críticos: cada 30 minutos")
         print(f"  🟡 Medios: cada 3 horas")
         print(f"  🟢 Bajos: cada 12 horas")
+        print(f"  📅 Horario: {'-'.join(dias_config)} {horario_inicio} - {horario_fin} (Colombia)")
         print(f"{'='*60}\n")
         
         ciclo = 0
@@ -843,7 +939,27 @@ class ExitoScraper:
         while True:
             try:
                 ciclo += 1
-                print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Ciclo #{ciclo}")
+                tz_colombia = pytz.timezone('America/Bogota')
+                ahora = datetime.now(tz_colombia)
+                print(f"\n[{ahora.strftime('%Y-%m-%d %H:%M:%S')}] Ciclo #{ciclo}")
+                
+                # Verificar si está en horario laboral
+                if not self.esta_en_horario_laboral():
+                    segundos_espera = self.calcular_proxima_ejecucion()
+                    horas = int(segundos_espera // 3600)
+                    minutos = int((segundos_espera % 3600) // 60)
+                    
+                    dia_nombre = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'][ahora.weekday()]
+                    print(f"⏸ Fuera de horario laboral ({dia_nombre} {ahora.strftime('%H:%M')})")
+                    print(f"   Horario permitido: {'-'.join(dias_config)} {horario_inicio} - {horario_fin}")
+                    
+                    if horas > 0:
+                        print(f"   💤 Durmiendo {horas}h {minutos}m hasta el próximo horario laboral...")
+                    else:
+                        print(f"   💤 Durmiendo {minutos}m hasta el próximo horario laboral...")
+                    
+                    time.sleep(segundos_espera)
+                    continue
                 
                 # Scraping inteligente
                 nuevos_productos = self.buscar_iphones_inteligente()
@@ -881,7 +997,10 @@ class ExitoScraper:
 
 if __name__ == "__main__":
     API_KEY = os.getenv('SCRAPER_API_KEY')
-    EMAILS_ADMIN = [os.getenv('EMAIL_ADMIN_1'), os.getenv('EMAIL_ADMIN_2')]
+    
+    # Leer emails destinatarios (separados por comas)
+    emails_str = os.getenv('EMAILS_DESTINATARIOS', '')
+    EMAILS_ADMIN = [email.strip() for email in emails_str.split(',') if email.strip()]
     
     scraper = ExitoScraper(API_KEY, email_destinatario=EMAILS_ADMIN)
     scraper.monitorear_inteligente()
