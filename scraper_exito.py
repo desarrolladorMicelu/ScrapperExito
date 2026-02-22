@@ -12,6 +12,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
 from dotenv import load_dotenv
 import pytz
+from sharepoint_uploader import subir_excel_a_sharepoint
 
 # Cargar variables de entorno
 load_dotenv()
@@ -972,6 +973,12 @@ class ExitoScraper:
                     self.save_data()
                     self.save_cache()
                     self.save_historial()
+                    
+                    # Subir Excel a SharePoint
+                    try:
+                        subir_excel_a_sharepoint()
+                    except Exception as e:
+                        print(f"⚠ Error subiendo a SharePoint: {e}")
                     
                     # Enviar email si hay cambios de posición
                     if cambios_posicion:
