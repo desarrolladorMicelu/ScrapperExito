@@ -46,3 +46,8 @@ desktop.ini
 *.tmp
 *.bak
 *.cache
+
+# Datos de runtime (no versionar: producción conserva los suyos)
+*.json
+*.xlsx
+.xlsx

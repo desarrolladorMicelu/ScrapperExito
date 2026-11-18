@@ -24,7 +24,9 @@ class ExitoScraper:
         self.data_file = "iphones_exito.json"
         self.cache_file = "cache_productos.json"
         self.historial_file = "historial_cambios.json"
-        self.api_catalog = "https://www.exito.com/api/catalog_system/pub/products/search"
+        # www.exito.com está detrás del challenge de Cloudflare (403)
+        # El host directo de VTEX entrega el mismo JSON sin WAF
+        self.api_catalog = "https://exitocol.myvtex.com/api/catalog_system/pub/products/search"
         
         # Configuración de email Azure
         self.connection_string = os.getenv('AZURE_EMAIL_CONNECTION_STRING')
@@ -422,6 +424,15 @@ class ExitoScraper:
             # Si no existe, retornar lista vacía
             return []
     
+    def log_error_api(self, url_api, error):
+        """Registra el detalle del fallo de la API (status y headers de Cloudflare)"""
+        response = getattr(error, 'response', None)
+        if response is not None:
+            cf_mitigated = response.headers.get('cf-mitigated', 'no')
+            print(f"  [API] {response.status_code} (cf-mitigated={cf_mitigated}) - {url_api}")
+        else:
+            print(f"  [API] ERROR {type(error).__name__}: {error} - {url_api}")
+
     def buscar_producto_individual(self, producto_config, headers):
         """Busca un producto individual (para paralelización)"""
         ean = producto_config.get('ean', '')
@@ -439,8 +450,8 @@ class ExitoScraper:
                 
                 if productos and len(productos) > 0:
                     producto_encontrado = productos[0]
-            except:
-                pass
+            except Exception as e:
+                self.log_error_api(url_api, e)
         
         # Si no se encontró por EAN, buscar por nombre
         if not producto_encontrado and nombre:
@@ -454,8 +465,8 @@ class ExitoScraper:
                 
                 if productos and len(productos) > 0:
                     producto_encontrado = productos[0]
-            except:
-                pass
+            except Exception as e:
+                self.log_error_api(url_api, e)
         
         if producto_encontrado:
             # Agregar info de OFIM al producto
@@ -514,7 +525,7 @@ class ExitoScraper:
                         print(f"✗ No encontrado: {producto_config.get('nombre', 'N/A')[:50]}")
                 except Exception as e:
                     no_encontrados += 1
-                    print(f"✗ Error: {producto_config.get('nombre', 'N/A')[:50]}")
+                    print(f"✗ Error: {producto_config.get('nombre', 'N/A')[:50]} -> {type(e).__name__}: {e}")
         
         # Eliminar duplicados por productId
         productos_unicos = {}
